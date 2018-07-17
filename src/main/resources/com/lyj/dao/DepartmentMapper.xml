@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyj.dao.DepartmentMapper">
+    <!--public Department getDeptById(Integer id);-->
+    <select id="getDeptById" resultType="com.lyj.bean.Department" databaseId="mysql">
+          SELECT id , deptname deptment  from tbl_dept where id=#{id}
+    </select>
+
+    <!--public Department getDeptByIdPlus(Integer id);-->
+    <!--
+      private Integer id;
+    private String deptment;
+    private List<Employee> emps;
+    -->
+    <resultMap id="MyDept" type="com.lyj.bean.Department">
+     <id column="id" property="id"/>
+     <result column="deptname" property="deptment"/>
+        <!--
+        collection:定义关联集合类型属性的封装，
+        ofType:指定集合里面元素的类型
+        -->
+        <collection property="emps" ofType="com.lyj.bean.Employee">
+            <!--定义这个集合中元素的封装规则-->
+            <!--比较奇怪的一点是当把id不起别名也直接叫id的时候，集合里面只有一条记录-->
+            <id column="eid" property="id"/>
+            <result column="last_name" property="lastName"/>
+            <result column="gender" property="gender"/>
+            <result column="email" property="email"/>
+        </collection>
+
+
+    </resultMap>
+    <select id="getDeptByIdPlus" resultMap="MyDept" databaseId="mysql">
+  SELECT d.deptname,d.id ,e.id eid,e.last_name,e.gender,
+          e.email
+   from tbl_dept d
+   LEFT JOIN tbl_employee e
+   on d.id=e.d_id where  d.id=#{id}
+    </select>
+
+    <!--分步查询-->
+    <!--public Department getDeptStepToEmp(Integer id);-->
+    <resultMap id="DeptStepEmp" type="com.lyj.bean.Department">
+        <id column="id" property="id"/>
+        <result column="deptment" property="deptment"/>
+        <!--分步查询直接调用sql进行查询，不通过mapper代理，在传递参数的过程中，如果有多
+        个参数，可以封装成map集合进行传值-->
+        <collection property="emps" select="com.lyj.dao.EmployeeMapperPlus.getEmpByDeptId"
+        column="{deptId=id}" fetchType="eager"><!--column="id",这里还有另外一种形式，可以直接用{key1 column1，key2 column2}-->
+            <id column="eid" property="id"/>
+            <result column="last_name" property="lastName"/>
+            <result column="gender" property="gender"/>
+            <result column="email" property="email"/>
+        </collection>
+    </resultMap>
+    <select id="getDeptStepToEmp" resultMap="DeptStepEmp" databaseId="mysql">
+         SELECT id , deptname deptment  from tbl_dept where id=#{id}
+    </select>
+
+</mapper>

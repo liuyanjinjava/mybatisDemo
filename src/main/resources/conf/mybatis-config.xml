@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="logImpl" value="LOG4J" />
+        <!--开启驼峰命名映射-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+            <!-- 打开延迟加载的开关 -->
+            <setting name="lazyLoadingEnabled" value="true" />
+            <!-- 将积极加载改为消息加载即按需加载 -->
+            <setting name="aggressiveLazyLoading" value="false" />
+        <!--lazyLoadTriggerMethods：指定哪个对象的方法触发一次延迟加载。默认值：equals,clone,hashCode,toString
+        所以，当我打印对象时，由于触发了 toString 方法，所以触发了一次懒加载-->
+            <setting name="lazyLoadTriggerMethods" value=""/>
+    </settings>
+    <!--批量起别名如果有冲突的情况下可以用@Alias注解为某个类型起新的别名-->
+   <typeAliases>
+       <package name="com.lyj.bean"></package>
+       <!--<typeAlias type="com.lyj.bean.Employee" alias="emp"></typeAlias>-->
+   </typeAliases>
+
+    <!--用来注册插件的-->
+    <plugins>
+        <plugin interceptor="com.lyj.dao.MyFirstPlugin">
+            <property name="username" value="root"></property>
+            <property name="password" value="root"></property>
+        </plugin>
+        <plugin interceptor="com.lyj.dao.MySecondPlugin">
+        </plugin>
+    </plugins>
+    <environments default="dev_mysql">
+        <environment id="dev_mysql">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+       <environment id="dev_oracle">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="oracle.jdbc.OracleDriver"/>
+                <property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
+                <property name="username" value="scott"/>
+                <property name="password" value="orcl"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--支持多数据库厂商的标签
+     this.typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
+     作用就是得到数据库厂商的标识，mybatis就能根据数据库厂商的标识来执行不同的sql；
+     getDatabaseProductName（）；
+     -->
+    <databaseIdProvider type="DB_VENDOR">
+        <!--服务名字不能写错，写错就gg-->
+        <property name="MySQL" value="mysql"></property>
+        <property name="Oracle" value="oracle"></property>
+    </databaseIdProvider>
+    <!--将我们写好的sql文件一定要注册到全局配置文件中-->
+    <mappers>
+        <!--resource引用类路径下的资源-->
+        <!--url 引用网络路径下的或者磁盘路径下的sql映射文件-->
+        <!--<mapper resource="mybatisMapper/employeeMapper.xml"/>-->
+        <!--<mapper resource="mybatisMapper/employeeMapperPlus.xml"/>-->
+        <!--<mapper resource="mybatisMapper/deptMapper.xml"/>-->
+        <package name="com.lyj.dao"/>
+    </mappers>
+
+</configuration>

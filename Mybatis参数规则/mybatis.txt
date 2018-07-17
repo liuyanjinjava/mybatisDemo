@@ -1,0 +1,65 @@
+单个参数：mybatis不会做特殊的处理；
+   #{参数名}：取出参数值；参数名可以随意，你高兴就好。。。。
+###多个参数mybatis会把参数处理成一个map集合{}由param1，param2或0,1来进行读取参数；
+Cause: org.apache.ibatis.binding.BindingException: Parameter 'id' not found.
+Available parameters are [arg1, arg0, param1, param2]
+
+命名参数；明确指定封装参数时map的key，@param("id")
+key:使用@param注解指定的值；
+value：参数值；
+#{指定的key取出对应的参数值}
+##################################################################
+如果多个参数正好是我们业务逻辑的数据模型，我们就可以直接传入pojo；
+如果多个参数不是业务模型中的数据，没有对应的pojo，不经常使用，为了方便，我们也可以传入map；
+#{key}就是取出map中对应的值，
+
+如果多个参数不是我们业务逻辑的数据，但是经常使用，推荐来编写一个TO(Transfer,Object)数据传输对象；
+例如分页数据模型：
+
+page{
+  int index；
+  int size；
+}
+#特别注意，如果是Collection(List,set)类型或者是数组，也会特殊处理。
+也是把传入的list或者数组封装在map中；
+-----------------------结合源码，mybatis怎么处理参数-----------------------------------
+ public Object getNamedParams(Object[] args) {
+        int paramCount = this.names.size();
+        if (args != null && paramCount != 0) {
+            if (!this.hasParamAnnotation && paramCount == 1) {
+                return args[(Integer)this.names.firstKey()];
+            } else {
+                Map<String, Object> param = new ParamMap();
+                int i = 0;
+
+                for(Iterator var5 = this.names.entrySet().iterator(); var5.hasNext(); ++i) {
+                    Entry<Integer, String> entry = (Entry)var5.next();
+                    param.put(entry.getValue(), args[(Integer)entry.getKey()]);
+                    String genericParamName = "param" + String.valueOf(i + 1);
+                    if (!this.names.containsValue(genericParamName)) {
+                        param.put(genericParamName, args[(Integer)entry.getKey()]);
+                    }
+                }
+
+                return param;
+            }
+        } else {
+            return null;
+        }
+    }
+----------------#-----------------------------参数值的获取。
+#{可以获取mybatis中的值}；
+还支持另外一种取值方式${}:可以获取mybatis中的值;
+ 区别：#{}是以预编译的方式，将参数设置到sql语句中；PreparedStatement:防止sql注入
+      ${}取出的值直接放在sql上，会有安全问题；多数情况下，我们应该用#{}去取
+
+    原生jdbc不支持占位符的我们就用${}去进行；
+    #{}：更丰富的用法
+    规定参数的一些规则；
+    javaType,jdbcType,mode(存储过程)，numericScale(),
+    resultMap(),typeHandler(),jdbcTypeName,expression();
+
+
+
+
+

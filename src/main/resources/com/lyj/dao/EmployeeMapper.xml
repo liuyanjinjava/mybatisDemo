@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+namespce:名称空间
+id:是唯一标识符；
+resultType:是返回值；
+#{id}从传递过来的参数中取出ID值；
+sql映射文件，配置了每一个sql，以及sql的封装规则等；
+3.将sql映射文件注册在全局配置文件中；
+
+-->
+<mapper namespace="com.lyj.dao.EmployeeMapper">
+    <!--每个crud语句都会生成一个mappedstatement对象封装在集合中-->
+    <select id="getEmpById" resultType="com.lyj.bean.Employee" databaseId="mysql">
+          <!--select id,last_name lastName,email,gender from tbl_employee where id = #{id}-->
+        select * from tbl_employee where id=#{id}
+  </select>
+    <!--public Employee getEmpByIdAndLastName(Integer id,String LastName);-->
+    <select id="getEmpByIdAndLastName" resultType="com.lyj.bean.Employee" databaseId="mysql">
+         select * from tbl_employee where id=${id} and last_name=#{lastName}
+    </select>
+    <!--public Employee getEmpByMap(Map<String,Object> map);-->
+    <select id="getEmpByMap" resultType="com.lyj.bean.Employee" databaseId="mysql">
+         select * from ${tableName} where id=#{id} and last_name=#{lastName}
+    </select>
+    <!--public List<Employee> getEmpByLastNameLike(String lastName);-->
+    <!--返回值类型要写集合里面元素的类型-->
+    <select id="getEmpByLastNameLike" resultType="com.lyj.bean.Employee" databaseId="mysql">
+      select * from tbl_employee where last_name like #{lastName}
+    </select>
+    <!--public Map<String,Object> getEmpByIdReturnMap(Integer id);-->
+    <!--返回一个map，key就是列名，值就是对应的值-->
+    <select id="getEmpByIdReturnMap" databaseId="mysql" resultType="map">
+       select * from tbl_employee where id=#{id}
+    </select>
+    <!--public Map<Integer,Employee> getEmpByLastNameLikeReturnMap();-->
+    <!--返回一个key值是主键，值是pojo的Map集合-->
+    <select id="getEmpByLastNameLikeReturnMap" databaseId="mysql" resultType="map">
+        select * from tbl_employee where last_name like #{lastName}
+    </select>
+
+
+    <!--############insert#########insert############insert##############-->
+    <!--public void  addEmp(Employee employee);-->
+    <!--关于这个parameterType是可以不用写的。。。-->
+    <!--mysql支持自增主键，mybatis也是利用getGeneratedkeys()获取到主键的值-->
+    <insert id="addEmp" parameterType="com.lyj.bean.Employee" useGeneratedKeys="true"
+    keyProperty="id" databaseId="mysql">
+          insert into tbl_employee(last_name,gender,email) values(#{lastName},#{gender},#{email})
+    </insert>
+
+
+    <!--############update#########update############update##############-->
+    <!--public void upadateEmp(Employee employee);-->
+    <update id="updateEmp" databaseId="mysql">
+        update tbl_employee set last_name=#{lastName},gender=#{gender},email=#{email}
+        where id=#{id}
+    </update>
+
+
+    <!--############delete#########delete############delete##############-->
+    <!--public void deleteEmpById(Integer id);-->
+    <delete id="deleteEmpById" databaseId="mysql">
+        delete from tbl_employee where id=#{id}
+    </delete>
+
+
+  <!--oracle 区域-->
+    <select id="getEmpById" resultType="com.lyj.bean.Employee" databaseId="oracle">
+        select * from employee where id=#{id}
+    </select>
+
+    <insert id="addEmp" databaseId="oracle">
+     <selectKey keyProperty="id" order="BEFORE" resultType="Integer">
+         <!--编写查询主键的sql语句-->
+         select Test_seq.nextval from dual
+     </selectKey>
+        <!--插入时的主键是从序列中拿到的-->
+        insert into employee values (#{id},#{lastName},#{gender},#{email})
+    </insert>
+</mapper>
